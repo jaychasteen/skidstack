@@ -1,0 +1,9 @@
+{
+  "name": "skidstack",
+  "version": "0.0.0",
+  "description": "skidstack",
+  "main": "server.js",
+  "author": {
+    "name": "jonat"
+  }
+}
