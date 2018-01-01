@@ -1,0 +1,15 @@
+{
+  "name": "skidstack",
+  "version": "0.0.1",
+  "description": "A forum and tool-set for grocery merchandising.",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "http://www.github.com/jechasteen/skidstack.git"
+  },
+  "author": "Jonathan Chasteen",
+  "license": "MIT"
+}
