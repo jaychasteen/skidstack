@@ -1,15 +1,22 @@
 {
   "name": "skidstack",
-  "version": "0.0.1",
-  "description": "A forum and tool-set for grocery merchandising.",
-  "main": "server.js",
+  "version": "1.0.0",
+  "description": "A StackExchange clone for retail merchandising.",
+  "main": "app.js",
+  "directories": {
+    "doc": "docs"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "http://www.github.com/jechasteen/skidstack.git"
+    "url": "git+https://github.com/jechasteen/skidstack.git"
   },
-  "author": "Jonathan Chasteen",
-  "license": "MIT"
+  "author": "Jay Chasteen",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/jechasteen/skidstack/issues"
+  },
+  "homepage": "https://github.com/jechasteen/skidstack#readme"
 }
