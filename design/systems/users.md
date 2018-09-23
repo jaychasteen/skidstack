@@ -8,6 +8,10 @@ see [QA](qa.md) for more information.
 
 The base URI for the Users application is `/u`
 
+The base URI for the Posts subsystem is `/u/:username/p`
+
+The base URI for the Groups subsystem is `/u/g`
+
 ---
 ### User/Login Routes
 
@@ -38,15 +42,16 @@ Then, the user chooses to create a new account using either OAuth or local.
 
 A users public profile can be retrieved via `/u/:username`
 
-For a logged in user, this and `/u/:loggedInUsersUsername/profile` are virtually identical. For any other user, /profile redirects to `/u/:username`
+For a logged in user, this and `/u/:loggedInUsersUsername/profile` are virtually identical. For any other user, `/u/:username/profile` redirects to `/u/:username`
 
 The content of this page is determined by checkboxes in the `/u/:username/profile` view. Users can choose what information is shown on their public profile, what is show to everyone, and what is shown to noone.
 
 Full profile information for a user is accessed at `/u/:username/profile` but requires the named user to be logged in.
+If a user wants to preview their profile: `/u/:username` will show their profile just as it is seen by others, but with a few edit buttons to direct the user to the correct part of the edit form.
 
 #### Update
 
-POST request to `/u/:username/profile` will update a logged in user's database entry.
+UPDATE request to `/u/:username/profile` will update a logged in user's database entry.
 
 #### Destroy
 
@@ -69,18 +74,19 @@ Posts can be read directly, but more commonly they will be read by a feed. Eithe
 
 Depending upon the context, the comments can be loaded or disabled. The query string 'comments' is a boolean that determines whether or not comments will be fetched. The default is false
 
-Comments are fetched via `/u/:username/p/c/:commentId`. This will return an array of Comments. It is up to the fetching code to fetch the User data if it is needed via the provided `_id`.
+Comments are fetched via GET `/u/:username/p/c/:commentId`. This will return an array of Comments. It is up to the fetching code to fetch the User data if it is needed via the provided `_id`.
+
+Users can fetch all posts by a user, listed chronologically by sending GET `/u/:username/p` but can also sort by score and comments via query string: `?sort=[score,comments]`
 
 #### Update
 
-A post can be updated by sending a UPDATE request to `/u/:username/p/:postId`. This should happen via on-page edit controls, i.e. on the user's feeds.
+A post can be updated by sending an UPDATE request to `/u/:username/p/:postId`. This should happen via on-page edit controls, i.e. on the user's feeds.
 
 #### Destroy
 
 To delete a post, send a delete request to `/u/:username/p/:postId`
 
 This will also delete any comments attached to it from the DB.
-
 
 
 ### User/Network Routes
@@ -156,7 +162,10 @@ This is a form page that allows UPDATE `/u/g/:groupId`
 
 #### Destroy
 
-Send a DELETE request to `/u/g/:groupId` as the group admin to delete all group information. This includes all posts to the message board. 
+Send a DELETE request to `/u/g/:groupId` as the group admin to delete all group information. This includes all posts to the message board.
+
+
+
 
 ## Pages
 
@@ -164,17 +173,25 @@ More or less in order of how they would be used.
 
 #### /u/new
 
+##### *views/users/landing.ejs*
+
 A landing page for the user creation sub. Gives the option of logging in via a selection of OAuth providers or creating a local account.
 
 #### /u/new?auth=local
+
+##### *views/users/auth_local.ejs*
 
 If the query string is used, show a sign-up form.
 
 #### /u/new/finalize
 
+##### *views/users/auth_OAuth_finalize.ejs*
+
 After successful OAuth, call back to this page. This allows the user to preview, proofread and edit the information taken from the provider before creating their account.
 
 #### /u
+
+##### *views/users/user_landing.ejs*
 
 The landing page for a logged in user. Shows their current feed.
 
@@ -182,33 +199,45 @@ TODO: What else do we include on the logged in landing page?
 
 #### /u/:username
 
+##### *views/users/profile_show.ejs*
+
 Shows a user profile in 'complete' form
 
 #### /u/:username/profile
 
-For a logged in user only, show the profile but with 'forms' for editing info
+##### *views/users/profile_edit.ejs*
 
-#### /u/:username/p/:postId
+For a logged in user only, show the profile but with 'forms' for editing info.
 
-A get request to this URI will send back the selected post information. Optional query strings allow disabling comments or truncating results.
-
-#### /u/:username/p/c/:commentId
-
-This URI returns a single comment and is used to populate a posts comments. The Post DB entry has a list of comments which are fetched at this URI.
-
-#### /u/:username/n
-
-This page displays the selected user's network with an optional query string that limits the returned data. To get a limited listing, use query string `format=brief`
+Checkboxes for each category of user: in-network, near-network, and all.
 
 #### /u/:username/p
 
+##### *views/users/posts_show_feed.ejs*
+
 Lists all posts by a user, sortable and filterable. This is essentially a feed of a single user.
 
+#### /u/:username/p/:postId
+
+##### *views/users/posts_show_single.ejs*
+
+A get request to this URI will send back the selected post information. Optional query strings allow disabling comments or truncating results.
+
+#### /u/:username/n
+
+##### *views/users/network_show.ejs*
+
+This page displays the selected user's network with an optional query string that limits the returned data. To get a limited listing, use query string `format=brief`
+
 #### /u/g/new
+
+##### *views/users/group_new.ejs*
 
 A form that allows for the creation of a group and inviting users to join.
 
 #### /u/g/:groupId
+
+##### *views/users/group_show.ejs*
 
 Short-form group info
 
@@ -222,4 +251,52 @@ Admin have special features such as delete message.
 
 #### /u/g/:groupId/update
 
+##### *views/users/group_edit.ejs`*
+
 A form allowing for editing the metadata for the group and for managing membership, i.e. blocking, removing and promoting members to admin.
+
+
+## Module File Structure
+
+#### File Naming Conventions
+
+##### .ejs
+
+* *_show
+
+    Pages that render the DB data directly, in other words the 'landing' pages for sub-systems
+
+* *_edit
+
+    Pages that show a form for editing metadata and/or content.
+
+* landing
+
+    A landing spot when we don't know anything about the user, e.g. /u -> views/users/new/landing.ejs or views/landing (i.e. index)
+
+#### File Structure
+
+    /project_root
+        /routes
+            /users
+                /groups
+                    groups.js
+                    /// ...
+                users.js
+            /// ...
+        /views
+            /users
+                auth_local.ejs
+                auth_OAuth_finalize.ejs
+                group_show.ejs
+                group_edit.ejs
+                group_new.ejs
+                landing.ejs
+                network_show.ejs
+                posts_show_single.ejs
+                posts_show_feed.ejs
+                profile_show.ejs
+                profile_edit.ejs
+                user_landing.ejs
+        /// ...
+
